@@ -4,7 +4,7 @@ from __future__ import print_function
 from neat.reporting import ReporterSet
 from neat.math_util import mean
 from neat.six_util import iteritems, itervalues
-
+import pickle
 
 class CompleteExtinctionException(Exception):
     pass
@@ -93,11 +93,19 @@ class Population(object):
             for g in itervalues(self.population):
                 if best is None or g.fitness > best.fitness:
                     best = g
-            self.reporters.post_evaluate(self.config, self.population, self.species, best)
+            self.reporters.post_evaluate(self.config, self.population, self.species, best, self.generation)
 
             # Track the best genome ever seen.
             if self.best_genome is None or best.fitness > self.best_genome.fitness:
                 self.best_genome = best
+                done = False
+                while not done:
+                    try:
+                        with open('winner.genome', 'wb') as f:
+                            pickle.dump(self.best_genome, f)
+                            done = True
+                    except Exception as e:
+                        print(e)
 
             if not self.config.no_fitness_termination:
                 # End if the fitness threshold is reached.

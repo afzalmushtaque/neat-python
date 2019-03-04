@@ -4,6 +4,7 @@ the most-fit genomes and information on genome/species fitness and species sizes
 """
 import copy
 import csv
+import os
 
 from neat.math_util import mean, stdev, median2
 from neat.reporting import BaseReporter
@@ -22,20 +23,32 @@ class StatisticsReporter(BaseReporter):
         BaseReporter.__init__(self)
         self.most_fit_genomes = []
         self.generation_statistics = []
+        
         #self.generation_cross_validation_statistics = []
 
-    def post_evaluate(self, config, population, species, best_genome):
+    def post_evaluate(self, config, population, species, best_genome, generation):
         self.most_fit_genomes.append(copy.deepcopy(best_genome))
 
         # Store the fitnesses of the members of each currently active species.
         species_stats = {}
         #species_cross_validation_stats = {}
+        generation_table = []
         for sid, s in iteritems(species.species):
-            species_stats[sid] = dict((k, v.fitness) for k, v in iteritems(s.members))
-            ##species_cross_validation_stats[sid] = dict((k, v.cross_fitness) for
-##                                                       k, v in iteritems(s.members))
+            member_fitnesses = {}
+            #species_stats[sid] = dict((k, v.fitness) for k, v in iteritems(s.members))
+            for k, v in iteritems(s.members):
+                member_fitnesses[k] = v.fitness
+                generation_table.append({'gid': generation, 'sid': sid, 'mid': k, 'fitness': v.fitness})
+            species_stats[sid] = member_fitnesses
+            ##species_cross_validation_stats[sid] = dict((k, v.cross_fitness) for k, v in iteritems(s.members))
         self.generation_statistics.append(species_stats)
         #self.generation_cross_validation_statistics.append(species_cross_validation_stats)
+        file_exists = os.path.isfile('stats.csv')
+        with open('stats.csv', 'a', newline='') as output_file:
+            dict_writer = csv.DictWriter(output_file, generation_table[0].keys())
+            if not file_exists:
+                dict_writer.writeheader()
+            dict_writer.writerows(generation_table)
 
     def get_fitness_stat(self, f):
         stat = []
