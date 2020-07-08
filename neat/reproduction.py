@@ -7,6 +7,7 @@ from __future__ import division
 import math
 import random
 from itertools import count
+import numpy as np
 
 from neat.config import ConfigParameter, DefaultClassConfig
 from neat.math_util import mean
@@ -100,7 +101,7 @@ class DefaultReproduction(DefaultClassConfig):
             if stagnant:
                 self.reporters.species_stagnant(stag_sid, stag_s)
             else:
-                all_fitnesses.extend(m.fitness for m in itervalues(stag_s.members))
+                all_fitnesses.extend(m.fitness for m in itervalues(stag_s.members) if not np.isneginf(m.fitness))
                 remaining_species.append(stag_s)
         # The above comment was not quite what was happening - now getting fitnesses
         # only from members of non-stagnated species.
@@ -119,7 +120,7 @@ class DefaultReproduction(DefaultClassConfig):
         fitness_range = max(1.0, max_fitness - min_fitness)
         for afs in remaining_species:
             # Compute adjusted fitness.
-            msf = mean([m.fitness for m in itervalues(afs.members)])
+            msf = mean([m.fitness for m in itervalues(afs.members) if not np.isneginf(m.fitness)])
             af = (msf - min_fitness) / fitness_range
             afs.adjusted_fitness = af
 
