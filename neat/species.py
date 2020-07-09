@@ -4,6 +4,7 @@ from itertools import count
 from neat.math_util import mean, stdev
 from neat.six_util import iteritems, iterkeys, itervalues
 from neat.config import ConfigParameter, DefaultClassConfig
+import numpy as np
 
 class Species(object):
     def __init__(self, key, generation):
@@ -21,7 +22,7 @@ class Species(object):
         self.members = members
 
     def get_fitnesses(self):
-        return [m.fitness for m in itervalues(self.members)]
+        return [m.fitness for m in itervalues(self.members) if not np.isneginf(m.fitness)]
 
 
 class GenomeDistanceCache(object):
