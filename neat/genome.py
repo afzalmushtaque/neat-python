@@ -171,6 +171,7 @@ class DefaultGenome(object):
 
         # Fitness results.
         self.fitness = None
+        self.alternative_metrics = {}
 
     def configure_new(self, config):
         """Configure a new genome based on the given configuration."""
